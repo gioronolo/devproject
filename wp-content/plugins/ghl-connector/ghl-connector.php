@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: GHL Connector - GIO
+ * Plugin Name: GHL Connector
  * Description: Connect WordPress to GoHighLevel - Contacts & Form Embed Manager.
  * Version: 3.0.0
  * Author: Your Name
