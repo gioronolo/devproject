@@ -1,163 +1,226 @@
 <?php
-/**
- * Register reusable block patterns so editors can insert
- * any SJB section from the Inserter → Patterns tab.
- */
 if ( ! defined( 'ABSPATH' ) ) exit;
-
-add_action( 'init', 'sjb_register_block_pattern_category' );
-function sjb_register_block_pattern_category() {
-	register_block_pattern_category( 'saint-johns-butchery', [
-		'label' => __( 'Saint Johns Butchery', 'saint-johns-butchery' ),
-	] );
-}
 
 add_action( 'init', 'sjb_register_block_patterns' );
 function sjb_register_block_patterns() {
-	$img = SJB_IMG;
+	register_block_pattern_category( 'saint-johns-butchery', [ 'label' => 'Saint Johns Butchery' ] );
 
-	/* ---- Hero Section ---- */
+	/* ---- Hero ---- */
 	register_block_pattern( 'sjb/hero', [
-		'title'      => __( 'SJB Hero Section', 'saint-johns-butchery' ),
+		'title'      => 'SJB Hero Section',
 		'categories' => [ 'saint-johns-butchery' ],
-		'content'    => <<<HTML
-<!-- wp:html -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="hero-badge">100% Free Range</div>
-      <h1>Top Quality, <em>Free Range</em> Meats at Competitive Prices</h1>
-      <p class="hero-text">Your trusted local butcher in St Johns, East Auckland. We source only the finest free range meats, hand-cut and prepared fresh in store every day.</p>
-      <div class="hero-actions">
-        <a href="/products/" class="btn btn--primary btn--lg">View Our Products</a>
-        <a href="/contact/" class="btn btn--secondary btn--lg">Get in Touch</a>
-      </div>
-    </div>
-    <div class="hero-image">
-      <img src="{$img}images-bbq-sausages-and-onions.jpg" alt="Saint Johns Butchery sausages on the BBQ" width="800" height="480" loading="eager">
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML,
+		'content'    => sjb_pattern_hero(),
 	] );
 
 	/* ---- Info Bar ---- */
 	register_block_pattern( 'sjb/info-bar', [
-		'title'      => __( 'SJB Info Bar', 'saint-johns-butchery' ),
+		'title'      => 'SJB Info Bar',
 		'categories' => [ 'saint-johns-butchery' ],
-		'content'    => <<<'HTML'
-<!-- wp:html -->
-<section class="info-bar">
-  <div class="container">
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      </div>
-      <div class="info-item__text"><strong>100% Free Range</strong><span>Ethically sourced meats</span></div>
-    </div>
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
-      </div>
-      <div class="info-item__text"><strong>Processed In Store</strong><span>Cut fresh daily</span></div>
-    </div>
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      </div>
-      <div class="info-item__text"><strong>Open 6 Days</strong><span>Tue–Sun, closed Mon</span></div>
-    </div>
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-      </div>
-      <div class="info-item__text"><strong>Easy Parking</strong><span>Off-street parking available</span></div>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML,
+		'content'    => sjb_pattern_info_bar(),
+	] );
+
+	/* ---- Product Cards Grid ---- */
+	register_block_pattern( 'sjb/products-grid', [
+		'title'      => 'SJB Products Grid',
+		'categories' => [ 'saint-johns-butchery' ],
+		'content'    => sjb_products_grid_block(),
 	] );
 
 	/* ---- CTA Banner ---- */
-	register_block_pattern( 'sjb/cta-banner', [
-		'title'      => __( 'SJB Call & Collect Banner', 'saint-johns-butchery' ),
+	register_block_pattern( 'sjb/cta', [
+		'title'      => 'SJB CTA Banner',
 		'categories' => [ 'saint-johns-butchery' ],
-		'content'    => <<<'HTML'
-<!-- wp:html -->
-<section class="cta-banner">
-  <div class="container">
-    <h2>Call &amp; Collect</h2>
-    <p>In a hurry? Call us with your order and we'll have it ready for quick collection. Custom meat packs available on request.</p>
-    <a href="tel:095216319" class="btn btn--primary btn--lg">Call 09 521 6319</a>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML,
+		'content'    => sjb_cta_block(
+			'Ready to order?',
+			'Visit us in store or call ahead to place a custom order.',
+			'Call Us',
+			'tel:+6495216319'
+		),
 	] );
 
-	/* ---- Page Header ---- */
-	register_block_pattern( 'sjb/page-header', [
-		'title'      => __( 'SJB Page Header', 'saint-johns-butchery' ),
+	/* ---- About ---- */
+	register_block_pattern( 'sjb/about', [
+		'title'      => 'SJB About Section',
 		'categories' => [ 'saint-johns-butchery' ],
-		'content'    => <<<'HTML'
-<!-- wp:html -->
-<div class="page-header">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a><span>/</span><span>Page Title</span>
-    </nav>
-    <h1>Page Title</h1>
-    <p>A short description of this page goes here.</p>
-  </div>
+		'content'    => sjb_pattern_about(),
+	] );
+}
+
+/* ============================================================
+   Pattern content functions
+   ============================================================ */
+
+function sjb_pattern_hero() {
+	$img = SJB_IMG . 'images-Saint-Johns-Butchery-Beef1.jpg';
+	return <<<BLOCK
+
+<!-- wp:group {"align":"full","className":"sjb-hero","style":{"color":{"gradient":"linear-gradient(170deg,#e8f6f9 0%,#d0f0f5 40%,#ffffff 100%)"},"spacing":{"padding":{"top":"5rem","bottom":"5rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-group alignfull sjb-hero" style="background:linear-gradient(170deg,#e8f6f9 0%,#d0f0f5 40%,#ffffff 100%);padding-top:5rem;padding-right:1.5rem;padding-bottom:5rem;padding-left:1.5rem">
+
+<!-- wp:columns {"align":"wide","verticalAlignment":"center","style":{"spacing":{"blockGap":{"top":"3rem","left":"4rem"}}}} -->
+<div class="wp-block-columns alignwide are-vertically-aligned-center">
+
+<!-- wp:column {"verticalAlignment":"center","width":"55%"} -->
+<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:55%">
+
+<!-- wp:paragraph {"style":{"color":{"background":"#2b6374","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"0.4rem","bottom":"0.4rem","left":"1rem","right":"1rem"}},"typography":{"fontSize":"0.8rem","fontWeight":"500"}}} -->
+<p class="sjb-badge has-text-color has-background" style="background-color:#2b6374;color:#ffffff;border-radius:9999px;padding-top:0.4rem;padding-right:1rem;padding-bottom:0.4rem;padding-left:1rem;font-size:0.8rem;font-weight:500">St Johns, Auckland — Est. 1982</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1,"style":{"typography":{"fontSize":"clamp(2.5rem,5vw,3.75rem)","lineHeight":"1.1"},"spacing":{"margin":{"top":"1.25rem","bottom":"1rem"}}}} -->
+<h1 class="wp-block-heading" style="font-size:clamp(2.5rem,5vw,3.75rem);line-height:1.1;margin-top:1.25rem;margin-bottom:1rem">Your Local <em>Free Range</em> Butchery</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#3a4650"},"typography":{"fontSize":"1.15rem"},"spacing":{"margin":{"top":"0","bottom":"2rem"}}}} -->
+<p class="has-text-color" style="color:#3a4650;font-size:1.15rem;margin-top:0;margin-bottom:2rem">Premium free range meats, handmade sausages &amp; specialty cuts — all processed in store. Open Tuesday to Sunday.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons {"style":{"spacing":{"blockGap":"1rem"}}} -->
+<div class="wp-block-buttons">
+<!-- wp:button {"style":{"color":{"background":"#5a9a1f","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"1rem","bottom":"1rem","left":"2rem","right":"2rem"}},"typography":{"fontSize":"1rem","fontWeight":"600"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/products/" style="border-radius:9999px;color:#ffffff;background-color:#5a9a1f;padding-top:1rem;padding-right:2rem;padding-bottom:1rem;padding-left:2rem;font-size:1rem;font-weight:600">Shop Our Range</a></div>
+<!-- /wp:button -->
+<!-- wp:button {"className":"is-style-outline","style":{"color":{"text":"#2b6374"},"border":{"radius":"9999px","color":"#2b6374","width":"2px"},"spacing":{"padding":{"top":"1rem","bottom":"1rem","left":"2rem","right":"2rem"}},"typography":{"fontSize":"1rem","fontWeight":"600"}}} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="/location/" style="border-radius:9999px;color:#2b6374;border:2px solid #2b6374;padding-top:1rem;padding-right:2rem;padding-bottom:1rem;padding-left:2rem;font-size:1rem;font-weight:600">Find Us</a></div>
+<!-- /wp:button -->
 </div>
-<!-- /wp:html -->
-HTML,
-	] );
+<!-- /wp:buttons -->
 
-	/* ---- Opening Hours Card ---- */
-	register_block_pattern( 'sjb/hours-card', [
-		'title'      => __( 'SJB Opening Hours Card', 'saint-johns-butchery' ),
-		'categories' => [ 'saint-johns-butchery' ],
-		'content'    => <<<'HTML'
-<!-- wp:html -->
-<div class="card">
-  <h3>Opening Hours</h3>
-  <table class="hours-table">
-    <tbody>
-      <tr class="closed"><td>Monday</td><td>Closed</td></tr>
-      <tr><td>Tuesday</td><td>7:30am – 6:00pm</td></tr>
-      <tr><td>Wednesday</td><td>7:30am – 6:00pm</td></tr>
-      <tr><td>Thursday</td><td>7:30am – 6:00pm</td></tr>
-      <tr><td>Friday</td><td>7:30am – 6:00pm</td></tr>
-      <tr><td>Saturday</td><td>8:00am – 6:00pm</td></tr>
-      <tr><td>Sunday</td><td>8:30am – 5:00pm</td></tr>
-    </tbody>
-  </table>
 </div>
-<!-- /wp:html -->
-HTML,
-	] );
+<!-- /wp:column -->
 
-	/* ---- Product Card (single, reusable) ---- */
-	register_block_pattern( 'sjb/product-card', [
-		'title'       => __( 'SJB Product Card', 'saint-johns-butchery' ),
-		'categories'  => [ 'saint-johns-butchery' ],
-		'description' => __( 'Single product card. Duplicate and adjust for additional products.', 'saint-johns-butchery' ),
-		'content'     => <<<HTML
-<!-- wp:html -->
-<a href="/products/lamb/" class="product-card">
-  <div class="product-card__image">
-    <img src="{$img}images-Saint-Johns-Butchery-Lamb.jpg" alt="Free range lamb" width="400" height="300" loading="lazy">
-  </div>
-  <div class="product-card__body">
-    <h3 class="product-card__title">Lamb</h3>
-    <p class="product-card__desc">Premium free range lamb cuts, from racks to shanks.</p>
-    <span class="product-card__link">View range <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></span>
-  </div>
-</a>
-<!-- /wp:html -->
-HTML,
-	] );
+<!-- wp:column {"verticalAlignment":"center","width":"45%"} -->
+<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:45%">
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full"><img src="{$img}" alt="Premium free range beef at Saint Johns Butchery" loading="lazy"/></figure>
+<!-- /wp:image -->
+
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+BLOCK;
+}
+
+function sjb_pattern_info_bar() {
+	return <<<BLOCK
+
+<!-- wp:group {"align":"full","className":"sjb-info-bar","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"top":"0","bottom":"0","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-group alignfull sjb-info-bar has-background" style="background-color:#ffffff;padding-top:0;padding-right:1.5rem;padding-bottom:0;padding-left:1.5rem">
+
+<!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"left":"0"}}}} -->
+<div class="wp-block-columns alignwide">
+
+<!-- wp:column {"style":{"spacing":{"padding":{"top":"1.5rem","bottom":"1.5rem","left":"1rem","right":"1rem"}}}} -->
+<div class="wp-block-column" style="padding-top:1.5rem;padding-right:1rem;padding-bottom:1.5rem;padding-left:1rem">
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.875rem","fontWeight":"700"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.875rem;font-weight:700;margin-top:0;margin-bottom:0.25rem">✓ 100% Free Range</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.75rem"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.75rem;margin-top:0;margin-bottom:0">Ethically sourced from NZ farms</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"style":{"spacing":{"padding":{"top":"1.5rem","bottom":"1.5rem","left":"1rem","right":"1rem"}}}} -->
+<div class="wp-block-column" style="padding-top:1.5rem;padding-right:1rem;padding-bottom:1.5rem;padding-left:1rem">
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.875rem","fontWeight":"700"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.875rem;font-weight:700;margin-top:0;margin-bottom:0.25rem">✦ Processed In Store</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.75rem"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.75rem;margin-top:0;margin-bottom:0">Cut fresh daily by our butchers</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"style":{"spacing":{"padding":{"top":"1.5rem","bottom":"1.5rem","left":"1rem","right":"1rem"}}}} -->
+<div class="wp-block-column" style="padding-top:1.5rem;padding-right:1rem;padding-bottom:1.5rem;padding-left:1rem">
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.875rem","fontWeight":"700"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.875rem;font-weight:700;margin-top:0;margin-bottom:0.25rem">◷ Open 6 Days</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.75rem"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.75rem;margin-top:0;margin-bottom:0">Tue–Fri 7:30am–6pm, Sat–Sun 8am</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"style":{"spacing":{"padding":{"top":"1.5rem","bottom":"1.5rem","left":"1rem","right":"1rem"}}}} -->
+<div class="wp-block-column" style="padding-top:1.5rem;padding-right:1rem;padding-bottom:1.5rem;padding-left:1rem">
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.875rem","fontWeight":"700"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.875rem;font-weight:700;margin-top:0;margin-bottom:0.25rem">⊡ Easy Parking</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.75rem"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.75rem;margin-top:0;margin-bottom:0">Corner of Felton Mathew Ave &amp; Merton Rd</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+BLOCK;
+}
+
+function sjb_pattern_about() {
+	$img = SJB_IMG . 'images-Saint-Johns-Butchery-About.jpg';
+	return <<<BLOCK
+
+<!-- wp:group {"align":"wide","className":"sjb-about","style":{"spacing":{"padding":{"top":"5rem","bottom":"5rem"}}}} -->
+<div class="wp-block-group alignwide sjb-about" style="padding-top:5rem;padding-bottom:5rem">
+
+<!-- wp:columns {"verticalAlignment":"center","style":{"spacing":{"blockGap":{"top":"3rem","left":"4rem"}}}} -->
+<div class="wp-block-columns are-vertically-aligned-center">
+
+<!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center">
+
+<!-- wp:image {"sizeSlug":"full"} -->
+<figure class="wp-block-image size-full"><img src="{$img}" alt="Saint Johns Butchery team" loading="lazy"/></figure>
+<!-- /wp:image -->
+
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center">
+
+<!-- wp:heading {"level":2,"style":{"spacing":{"margin":{"top":"0","bottom":"1rem"}}}} -->
+<h2 class="wp-block-heading" style="margin-top:0;margin-bottom:1rem">A family butchery since 1982</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#3a4650"},"typography":{"fontSize":"1.05rem"},"spacing":{"margin":{"top":"0","bottom":"1rem"}}}} -->
+<p class="has-text-color" style="color:#3a4650;font-size:1.05rem;margin-top:0;margin-bottom:1rem">Saint Johns Butchery has been serving the St Johns community for over 40 years. We pride ourselves on sourcing only free range, ethically raised animals from New Zealand farms.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#3a4650"},"typography":{"fontSize":"1.05rem"},"spacing":{"margin":{"top":"0","bottom":"2rem"}}}} -->
+<p class="has-text-color" style="color:#3a4650;font-size:1.05rem;margin-top:0;margin-bottom:2rem">Everything is processed in store by our experienced butchers, so you get the freshest cuts every time. From everyday mince to custom wedding orders — we do it all.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons">
+<!-- wp:button {"style":{"color":{"background":"#2b6374","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"0.875rem","bottom":"0.875rem","left":"1.75rem","right":"1.75rem"}},"typography":{"fontSize":"0.95rem","fontWeight":"600"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/contact/" style="border-radius:9999px;color:#ffffff;background-color:#2b6374;padding-top:0.875rem;padding-right:1.75rem;padding-bottom:0.875rem;padding-left:1.75rem;font-size:0.95rem;font-weight:600">Get in Touch</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+BLOCK;
 }

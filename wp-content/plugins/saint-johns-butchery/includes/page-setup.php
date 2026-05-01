@@ -2,903 +2,920 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /* ============================================================
-   Page content helpers
+   Block builder helpers
    ============================================================ */
 
-function sjb_arrow_svg() {
-	return '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>';
+/** Single product card as a wp:column → wp:group (no wp:html) */
+function sjb_product_card_block( $title, $slug, $img_file, $alt, $desc ) {
+	$img  = SJB_IMG . $img_file;
+	$href = "/products/{$slug}/";
+	return <<<BLOCK
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:group {"className":"sjb-product-card","style":{"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"0"}},"color":{"background":"#ffffff"}}} -->
+<div class="wp-block-group sjb-product-card has-background" style="background-color:#ffffff;padding:0">
+
+<!-- wp:image {"sizeSlug":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<figure class="wp-block-image size-full" style="margin-top:0;margin-bottom:0"><img src="{$img}" alt="{$alt}" loading="lazy"/></figure>
+<!-- /wp:image -->
+
+<!-- wp:group {"className":"sjb-product-card__body","style":{"spacing":{"padding":{"top":"1.5rem","bottom":"1.5rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-group sjb-product-card__body" style="padding:1.5rem">
+
+<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"1.25rem"},"spacing":{"margin":{"top":"0","bottom":"0.5rem"}}}} -->
+<h3 class="wp-block-heading" style="font-size:1.25rem;margin-top:0;margin-bottom:0.5rem">{$title}</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.875rem"},"spacing":{"margin":{"top":"0","bottom":"1rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.875rem;margin-top:0;margin-bottom:1rem">{$desc}</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons">
+<!-- wp:button {"className":"sjb-card-link","style":{"color":{"text":"#2b6374","background":"transparent"},"border":{"radius":"0"},"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"0"}},"typography":{"fontSize":"0.85rem","fontWeight":"600"}}} -->
+<div class="wp-block-button sjb-card-link"><a class="wp-block-button__link wp-element-button" href="{$href}" style="color:#2b6374;background-color:transparent;border-radius:0;padding:0;font-size:0.85rem;font-weight:600">View range →</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:group -->
+
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+BLOCK;
 }
 
-function sjb_img( $filename ) {
-	return SJB_IMG . $filename;
+/** Page header (full-width sky gradient, breadcrumb + h1 + optional desc) */
+function sjb_page_header_block( $title, $desc = '', $breadcrumbs = [] ) {
+	$crumbs = '<a href="/">Home</a>';
+	foreach ( $breadcrumbs as $label => $href ) {
+		$crumbs .= ' <span style="color:#c4cad0">/</span> ';
+		if ( $href ) {
+			$crumbs .= '<a href="' . esc_attr( $href ) . '">' . esc_html( $label ) . '</a>';
+		} else {
+			$crumbs .= esc_html( $label );
+		}
+	}
+
+	$desc_block = '';
+	if ( $desc ) {
+		$desc_block = <<<BLOCK
+
+<!-- wp:paragraph {"align":"center","style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"1.1rem"},"spacing":{"margin":{"top":"0.5rem","bottom":"0"}}}} -->
+<p class="has-text-align-center has-text-color" style="color:#6b7b8a;font-size:1.1rem;margin-top:0.5rem;margin-bottom:0">{$desc}</p>
+<!-- /wp:paragraph -->
+BLOCK;
+	}
+
+	return <<<BLOCK
+
+<!-- wp:group {"align":"full","className":"sjb-page-header","style":{"color":{"gradient":"linear-gradient(170deg,#e8f6f9 0%,#d0f0f5 60%,#ffffff 100%)"},"spacing":{"padding":{"top":"4rem","bottom":"3rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-group alignfull sjb-page-header" style="background:linear-gradient(170deg,#e8f6f9 0%,#d0f0f5 60%,#ffffff 100%);padding-top:4rem;padding-right:1.5rem;padding-bottom:3rem;padding-left:1.5rem">
+
+<!-- wp:paragraph {"align":"center","className":"sjb-breadcrumb","style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.8rem"},"spacing":{"margin":{"top":"0","bottom":"1rem"}}}} -->
+<p class="has-text-align-center has-text-color sjb-breadcrumb" style="color:#6b7b8a;font-size:0.8rem;margin-top:0;margin-bottom:1rem">{$crumbs}</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"textAlign":"center","level":1,"style":{"spacing":{"margin":{"top":"0","bottom":"0.5rem"}}}} -->
+<h1 class="wp-block-heading has-text-align-center" style="margin-top:0;margin-bottom:0.5rem">{$title}</h1>
+<!-- /wp:heading -->
+{$desc_block}
+</div>
+<!-- /wp:group -->
+
+BLOCK;
 }
+
+/** CTA banner (full-width green gradient) */
+function sjb_cta_block( $heading, $body, $btn_text, $btn_href ) {
+	return <<<BLOCK
+
+<!-- wp:group {"align":"full","className":"sjb-cta","style":{"color":{"gradient":"linear-gradient(135deg,#5a9a1f 0%,#3d6e14 100%)"},"spacing":{"padding":{"top":"4rem","bottom":"4rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-group alignfull sjb-cta" style="background:linear-gradient(135deg,#5a9a1f 0%,#3d6e14 100%);padding-top:4rem;padding-right:1.5rem;padding-bottom:4rem;padding-left:1.5rem">
+
+<!-- wp:heading {"textAlign":"center","level":2,"style":{"color":{"text":"#ffffff"},"spacing":{"margin":{"top":"0","bottom":"0.5rem"}}}} -->
+<h2 class="wp-block-heading has-text-align-center has-text-color" style="color:#ffffff;margin-top:0;margin-bottom:0.5rem">{$heading}</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","style":{"color":{"text":"rgba(255,255,255,0.9)"},"typography":{"fontSize":"1.05rem"},"spacing":{"margin":{"top":"0","bottom":"2rem"}}}} -->
+<p class="has-text-align-center has-text-color" style="color:rgba(255,255,255,0.9);font-size:1.05rem;margin-top:0;margin-bottom:2rem">{$body}</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+<div class="wp-block-buttons">
+<!-- wp:button {"style":{"color":{"background":"#ffffff","text":"#3d6e14"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"1rem","bottom":"1rem","left":"2rem","right":"2rem"}},"typography":{"fontSize":"1rem","fontWeight":"600"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="{$btn_href}" style="border-radius:9999px;color:#3d6e14;background-color:#ffffff;padding-top:1rem;padding-right:2rem;padding-bottom:1rem;padding-left:2rem;font-size:1rem;font-weight:600">{$btn_text}</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:group -->
+
+BLOCK;
+}
+
+/** Two rows of 4 product cards */
+function sjb_products_grid_block( $include_all = true ) {
+	$row1  = sjb_product_card_block( 'Lamb',           'lamb',           'images-Saint-Johns-Butchery-Lamb.jpg',                 'Fresh free range lamb cuts',         'Premium free range lamb cuts, from racks to shanks.' );
+	$row1 .= sjb_product_card_block( 'Beef',           'beef',           'images-Saint-Johns-Butchery-Beef1.jpg',                'Quality pasture-fed beef',           'From premium steaks to slow-cook cuts and mince.' );
+	$row1 .= sjb_product_card_block( 'Pork',           'pork',           'images-Saint-Johns-Butchery-Pork.jpg',                 'Free range pork',                    'Free range pork including chops, roasts, and belly.' );
+	$row1 .= sjb_product_card_block( 'Chicken',        'chicken',        'images-Saint-Johns-Butchery-Flavoured-Chicken.jpg',    'Free range chicken',                 'Whole chickens, portions, and our famous flavoured chicken.' );
+
+	$row2  = sjb_product_card_block( 'Sausages',       'sausages',       'images-Hanging-Sausages.jpg',                          'Handmade sausages',                  'Handmade in store daily with a huge range of flavours.' );
+	$row2 .= sjb_product_card_block( 'Specialty Meats','specialty-meats','images-Saint-Johns-Butchery-Specialty-Meats-Hams.jpg', 'Specialty and game meats',           'Venison, rabbit, duck, and other specialty meats.' );
+	$row2 .= sjb_product_card_block( 'Small Goods',    'small-goods',    'images-Saint-Johns-Butchery-Small-Goods-Hams.jpg',     'Small goods, bacon, and ham',        'Bacon, ham, salami, and other deli favourites.' );
+	$row2 .= sjb_product_card_block( 'Condiments',     'condiments',     'images-Four-Saucemen-Sauces-St-Johns.jpg',             'Sauces and condiments',              'Sauces, marinades, and condiments to complement your meal.' );
+
+	return <<<BLOCK
+
+<!-- wp:columns {"align":"wide","isStackedOnMobile":true,"style":{"spacing":{"blockGap":{"top":"1.5rem","left":"1.5rem"},"margin":{"bottom":"1.5rem"}}}} -->
+<div class="wp-block-columns alignwide" style="margin-bottom:1.5rem">{$row1}</div>
+<!-- /wp:columns -->
+
+<!-- wp:columns {"align":"wide","isStackedOnMobile":true,"style":{"spacing":{"blockGap":{"top":"1.5rem","left":"1.5rem"}}}} -->
+<div class="wp-block-columns alignwide">{$row2}</div>
+<!-- /wp:columns -->
+
+BLOCK;
+}
+
+/** Product detail cuts list (wp:list — no wp:html) */
+function sjb_cuts_list_block( array $cuts ) {
+	$items = '';
+	foreach ( $cuts as $cut ) {
+		$items .= "\n<!-- wp:list-item --><li>" . esc_html( $cut ) . '</li><!-- /wp:list-item -->';
+	}
+	return <<<BLOCK
+
+<!-- wp:list {"className":"sjb-product-list","style":{"spacing":{"padding":{"top":"1rem","bottom":"0"}}}} -->
+<ul class="wp-block-list sjb-product-list" style="padding-top:1rem;padding-bottom:0">{$items}
+</ul>
+<!-- /wp:list -->
+
+BLOCK;
+}
+
+/* ============================================================
+   Page content functions
+   ============================================================ */
 
 /* ---- HOME ---- */
 function sjb_home_content() {
 	$img = SJB_IMG;
-	$arrow = sjb_arrow_svg();
-	return <<<HTML
-<!-- wp:html -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="hero-badge">100% Free Range</div>
-      <h1>Top Quality, <em>Free Range</em> Meats at Competitive Prices</h1>
-      <p class="hero-text">Your trusted local butcher in St Johns, East Auckland. We source only the finest free range meats, hand-cut and prepared fresh in store every day.</p>
-      <div class="hero-actions">
-        <a href="/products/" class="btn btn--primary btn--lg">View Our Products</a>
-        <a href="/contact/" class="btn btn--secondary btn--lg">Get in Touch</a>
-      </div>
-    </div>
-    <div class="hero-image">
-      <img src="{$img}images-bbq-sausages-and-onions.jpg" alt="Saint Johns Butchery sausages on the BBQ" width="800" height="480" loading="eager">
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
 
-<!-- wp:html -->
-<section class="info-bar">
-  <div class="container">
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.745 3.745 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
-      </div>
-      <div class="info-item__text"><strong>100% Free Range</strong><span>Ethically sourced meats</span></div>
-    </div>
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-      </div>
-      <div class="info-item__text"><strong>Processed In Store</strong><span>Cut fresh daily</span></div>
-    </div>
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      </div>
-      <div class="info-item__text"><strong>Open 6 Days</strong><span>Tue–Sun, closed Mon</span></div>
-    </div>
-    <div class="info-item">
-      <div class="info-item__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
-      </div>
-      <div class="info-item__text"><strong>Easy Parking</strong><span>Off-street parking available</span></div>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
+	$grid = sjb_products_grid_block();
+	$cta  = sjb_cta_block(
+		'Call &amp; Collect',
+		"In a hurry? Call us with your order and we'll have it ready for quick collection. Custom meat packs available on request.",
+		'Call 09 521 6319',
+		'tel:095216319'
+	);
 
-<!-- wp:html -->
-<section class="about-section section">
-  <div class="container">
-    <div class="about-image">
-      <img src="{$img}images-Saint-Johns-Butchery-Storefront-and-Neighbours-April2018.jpg" alt="Saint Johns Butchery storefront" width="600" height="400" loading="lazy">
-    </div>
-    <div class="about-content">
-      <h2>Your Trusted Local Butcher</h2>
-      <p>Welcome to Saint Johns Butchery, where we pride ourselves on offering top quality, free range meats at competitive prices. All of our meats are free range and processed in store, so you can be sure of freshness and quality every time.</p>
-      <p>We provide our customers with a range of dairy-free and gluten-free products. If you can't find what you're looking for, let us know and we'll do our best to get it for you. We also offer custom packing on request.</p>
-      <p>Whether you're after the perfect Sunday roast, a weeknight stir-fry, or gourmet sausages for the BBQ, we've got you covered.</p>
-      <a href="/contact/" class="btn btn--primary" style="margin-top:1.5rem;">Contact Us</a>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
+	return <<<BLOCKS
 
-<!-- wp:html -->
-<section class="section" style="background:var(--gray-100);">
-  <div class="container">
-    <div class="section-header">
-      <h2>Our Products</h2>
-      <p>An amazing selection of free range meats, all processed in store. From sausages and steaks to ham and chicken.</p>
-    </div>
-    <div class="products-grid">
-      <a href="/products/lamb/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Lamb.jpg" alt="Fresh lamb cuts" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Lamb</h3>
-          <p class="product-card__desc">Premium free range lamb cuts, from racks to shanks.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/beef/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Beef1.jpg" alt="Quality beef" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Beef</h3>
-          <p class="product-card__desc">From premium steaks to slow-cook cuts and mince.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/pork/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Pork.jpg" alt="Free range pork" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Pork</h3>
-          <p class="product-card__desc">Free range pork including chops, roasts, and belly.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/chicken/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Flavoured-Chicken.jpg" alt="Flavoured chicken" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Chicken</h3>
-          <p class="product-card__desc">Whole chickens, portions, and our famous flavoured chicken.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/sausages/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Hanging-Sausages.jpg" alt="Handmade sausages" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Sausages</h3>
-          <p class="product-card__desc">Handmade in store with a huge range of flavours.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/specialty-meats/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Specialty-Meats-Hams.jpg" alt="Specialty meats" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Specialty Meats</h3>
-          <p class="product-card__desc">Venison, rabbit, duck, and other specialty meats.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/small-goods/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Small-Goods-Hams.jpg" alt="Small goods and hams" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Small Goods</h3>
-          <p class="product-card__desc">Bacon, ham, salami, and other deli favourites.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/condiments/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Four-Saucemen-Sauces-St-Johns.jpg" alt="Sauces and condiments" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Condiments</h3>
-          <p class="product-card__desc">Sauces, marinades, and condiments to complement your meal.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
+<!-- wp:group {"align":"full","className":"sjb-hero","style":{"color":{"gradient":"linear-gradient(170deg,#e8f6f9 0%,#d0f0f5 40%,#ffffff 100%)"},"spacing":{"padding":{"top":"6rem","bottom":"4rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull sjb-hero" style="background:linear-gradient(170deg,#e8f6f9 0%,#d0f0f5 40%,#ffffff 100%);padding-top:6rem;padding-right:0;padding-bottom:4rem;padding-left:0">
 
-<!-- wp:html -->
-<section class="cta-banner">
-  <div class="container">
-    <h2>Call &amp; Collect</h2>
-    <p>In a hurry? Call us with your order and we'll have it ready for quick collection. Custom meat packs available on request.</p>
-    <a href="tel:095216319" class="btn btn--primary btn--lg">Call 09 521 6319</a>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML;
+<!-- wp:columns {"align":"wide","isStackedOnMobile":true,"style":{"spacing":{"blockGap":{"left":"4rem"}}}} -->
+<div class="wp-block-columns alignwide">
+
+<!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center">
+
+<!-- wp:paragraph {"className":"sjb-badge","style":{"color":{"background":"#8cc63f","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"0.25rem","bottom":"0.25rem","left":"1rem","right":"1rem"},"margin":{"top":"0","bottom":"1.5rem"}},"typography":{"fontSize":"0.75rem","fontWeight":"700","textTransform":"uppercase","letterSpacing":"0.1em"}}} -->
+<p class="sjb-badge has-text-color has-background" style="border-radius:9999px;color:#ffffff;background-color:#8cc63f;margin-top:0;margin-bottom:1.5rem;padding-top:0.25rem;padding-right:1rem;padding-bottom:0.25rem;padding-left:1rem;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">100% Free Range</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1,"style":{"typography":{"fontSize":"clamp(2rem,5vw,3.2rem)","lineHeight":"1.2"},"spacing":{"margin":{"top":"0","bottom":"1.5rem"}}}} -->
+<h1 class="wp-block-heading" style="font-size:clamp(2rem,5vw,3.2rem);line-height:1.2;margin-top:0;margin-bottom:1.5rem">Top Quality, <em style="font-style:normal;color:#2b6374">Free Range</em> Meats at Competitive Prices</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"1.1rem"},"spacing":{"margin":{"top":"0","bottom":"2rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:1.1rem;margin-top:0;margin-bottom:2rem">Your trusted local butcher in St Johns, East Auckland. We source only the finest free range meats, hand-cut and prepared fresh in store every day.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons {"style":{"spacing":{"blockGap":"1rem"}}} -->
+<div class="wp-block-buttons">
+<!-- wp:button {"style":{"color":{"background":"#2b6374","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"1rem","bottom":"1rem","left":"2rem","right":"2rem"}},"typography":{"fontSize":"1rem","fontWeight":"600"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/products/" style="border-radius:9999px;color:#ffffff;background-color:#2b6374;padding-top:1rem;padding-right:2rem;padding-bottom:1rem;padding-left:2rem;font-size:1rem;font-weight:600">View Our Products</a></div>
+<!-- /wp:button -->
+<!-- wp:button {"className":"is-style-outline","style":{"color":{"text":"#2b6374"},"border":{"radius":"9999px","color":"#2b6374","width":"2px"},"spacing":{"padding":{"top":"1rem","bottom":"1rem","left":"2rem","right":"2rem"}},"typography":{"fontSize":"1rem","fontWeight":"600"}}} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link has-text-color wp-element-button" href="/contact/" style="border-radius:9999px;border-color:#2b6374;border-width:2px;color:#2b6374;padding-top:1rem;padding-right:2rem;padding-bottom:1rem;padding-left:2rem;font-size:1rem;font-weight:600">Get in Touch</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center">
+
+<!-- wp:image {"sizeSlug":"full","style":{"border":{"radius":"20px"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<figure class="wp-block-image size-full" style="border-radius:20px;margin-top:0;margin-bottom:0"><img src="{$img}images-bbq-sausages-and-onions.jpg" alt="Saint Johns Butchery sausages on the BBQ" loading="eager"/></figure>
+<!-- /wp:image -->
+
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align":"full","className":"sjb-info-bar","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull sjb-info-bar has-background" style="background-color:#ffffff;padding:0">
+
+<!-- wp:columns {"align":"wide","isStackedOnMobile":false} -->
+<div class="wp-block-columns alignwide">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:heading {"level":4,"style":{"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="margin-top:0;margin-bottom:0.25rem">✓ 100% Free Range</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p style="margin:0">Ethically sourced meats</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:heading {"level":4,"style":{"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="margin-top:0;margin-bottom:0.25rem">✦ Processed In Store</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p style="margin:0">Cut fresh daily</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:heading {"level":4,"style":{"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="margin-top:0;margin-bottom:0.25rem">◷ Open 6 Days</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p style="margin:0">Tue–Sun, closed Mon</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:heading {"level":4,"style":{"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="margin-top:0;margin-bottom:0.25rem">⊡ Easy Parking</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p style="margin:0">Off-street parking available</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align":"full","className":"sjb-about","style":{"color":{"background":"#f8fafb"},"spacing":{"padding":{"top":"6rem","bottom":"6rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull sjb-about has-background" style="background-color:#f8fafb;padding-top:6rem;padding-right:0;padding-bottom:6rem;padding-left:0">
+
+<!-- wp:columns {"align":"wide","isStackedOnMobile":true,"style":{"spacing":{"blockGap":{"left":"4rem"}}}} -->
+<div class="wp-block-columns alignwide">
+
+<!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center">
+<!-- wp:image {"sizeSlug":"full","style":{"border":{"radius":"12px"}}} -->
+<figure class="wp-block-image size-full" style="border-radius:12px"><img src="{$img}images-Saint-Johns-Butchery-Storefront-and-Neighbours-April2018.jpg" alt="Saint Johns Butchery storefront" loading="lazy"/></figure>
+<!-- /wp:image -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center">
+
+<!-- wp:heading {"level":2,"style":{"spacing":{"margin":{"top":"0","bottom":"1.5rem"}}}} -->
+<h2 class="wp-block-heading" style="margin-top:0;margin-bottom:1.5rem">Your Trusted Local Butcher</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"}}} -->
+<p class="has-text-color" style="color:#6b7b8a">Welcome to Saint Johns Butchery, where we pride ourselves on offering top quality, free range meats at competitive prices. All of our meats are free range and processed in store, so you can be sure of freshness and quality every time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"}}} -->
+<p class="has-text-color" style="color:#6b7b8a">We provide dairy-free and gluten-free products. If you can't find what you're looking for, let us know and we'll do our best to get it for you. We also offer custom packing on request.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"spacing":{"margin":{"bottom":"2rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;margin-bottom:2rem">Whether you're after the perfect Sunday roast, a weeknight stir-fry, or gourmet sausages for the BBQ, we've got you covered.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons">
+<!-- wp:button {"style":{"color":{"background":"#2b6374","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"0.75rem","bottom":"0.75rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/contact/" style="border-radius:9999px;color:#ffffff;background-color:#2b6374;padding-top:0.75rem;padding-right:1.5rem;padding-bottom:0.75rem;padding-left:1.5rem">Contact Us</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align":"full","style":{"color":{"background":"#f1f3f5"},"spacing":{"padding":{"top":"6rem","bottom":"6rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull has-background" style="background-color:#f1f3f5;padding-top:6rem;padding-right:0;padding-bottom:6rem;padding-left:0">
+
+<!-- wp:heading {"textAlign":"center","level":2,"className":"sjb-section-heading","style":{"spacing":{"margin":{"top":"0","bottom":"0.75rem"}}}} -->
+<h2 class="wp-block-heading has-text-align-center sjb-section-heading" style="margin-top:0;margin-bottom:0.75rem">Our Products</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","className":"sjb-section-desc","style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"1.05rem"},"spacing":{"margin":{"top":"0","bottom":"3rem"}}}} -->
+<p class="has-text-align-center has-text-color sjb-section-desc" style="color:#6b7b8a;font-size:1.05rem;margin-top:0;margin-bottom:3rem">An amazing selection of free range meats, all processed in store. From sausages and steaks to ham and chicken.</p>
+<!-- /wp:paragraph -->
+
+{$grid}
+
+</div>
+<!-- /wp:group -->
+
+{$cta}
+
+BLOCKS;
 }
 
-/* ---- PRODUCTS (overview) ---- */
+/* ---- PRODUCTS overview ---- */
 function sjb_products_content() {
-	$img   = SJB_IMG;
-	$arrow = sjb_arrow_svg();
-	return <<<HTML
-<!-- wp:html -->
-<div class="page-header">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a><span>/</span><span>Products</span>
-    </nav>
-    <h1>Our Products</h1>
-    <p>Top quality, free range meats — all processed in store and cut fresh every day.</p>
-  </div>
+	$grid = sjb_products_grid_block();
+	$header = sjb_page_header_block(
+		'Our Products',
+		'Top quality, free range meats — all processed in store and cut fresh every day.',
+		[ 'Products' => null ]
+	);
+	$cta = sjb_cta_block(
+		"Can't Find What You Need?",
+		"We can source and custom cut almost anything. Get in touch and we'll sort it out for you.",
+		'Call 09 521 6319',
+		'tel:095216319'
+	);
+
+	return <<<BLOCKS
+{$header}
+
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"6rem","bottom":"6rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull" style="padding-top:6rem;padding-right:0;padding-bottom:6rem;padding-left:0">
+{$grid}
 </div>
-<!-- /wp:html -->
+<!-- /wp:group -->
 
-<!-- wp:html -->
-<section class="section">
-  <div class="container">
-    <div class="products-grid">
-      <a href="/products/lamb/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Lamb.jpg" alt="Fresh lamb cuts" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Lamb</h3>
-          <p class="product-card__desc">Premium free range lamb cuts, from racks to shanks. Sourced from New Zealand's finest farms.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/beef/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Beef1.jpg" alt="Quality beef" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Beef</h3>
-          <p class="product-card__desc">Pasture-fed beef from premium NZ farms — steaks, roasts, mince, and slow-cook cuts.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/pork/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Pork.jpg" alt="Free range pork" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Pork</h3>
-          <p class="product-card__desc">Free range pork including chops, belly, roasts, and ribs.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/chicken/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Flavoured-Chicken.jpg" alt="Flavoured chicken" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Chicken</h3>
-          <p class="product-card__desc">Whole chickens, portions, and our famous flavoured and marinated chicken.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/sausages/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Hanging-Sausages.jpg" alt="Handmade sausages" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Sausages</h3>
-          <p class="product-card__desc">Handmade in store daily — a huge range of flavours including gluten-free options.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/specialty-meats/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Specialty-Meats-Hams.jpg" alt="Specialty meats" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Specialty Meats</h3>
-          <p class="product-card__desc">Venison, rabbit, duck, quail, and other premium specialty and game meats.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/small-goods/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Saint-Johns-Butchery-Small-Goods-Hams.jpg" alt="Small goods and hams" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Small Goods</h3>
-          <p class="product-card__desc">Bacon, ham, salami, prosciutto, and other quality deli favourites.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-      <a href="/products/condiments/" class="product-card">
-        <div class="product-card__image"><img src="{$img}images-Four-Saucemen-Sauces-St-Johns.jpg" alt="Sauces and condiments" width="400" height="300" loading="lazy"></div>
-        <div class="product-card__body">
-          <h3 class="product-card__title">Condiments</h3>
-          <p class="product-card__desc">Sauces, marinades, herb rubs, and condiments to complement your meat.</p>
-          <span class="product-card__link">View range {$arrow}</span>
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
-
-<!-- wp:html -->
-<section class="cta-banner">
-  <div class="container">
-    <h2>Can't Find What You Need?</h2>
-    <p>We can source and custom cut almost anything. Get in touch and we'll sort it out for you.</p>
-    <a href="tel:095216319" class="btn btn--primary btn--lg">Call 09 521 6319</a>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML;
+{$cta}
+BLOCKS;
 }
 
-/* ---- PRODUCT DETAIL (generic builder) ---- */
+/* ---- PRODUCT DETAIL (generic) ---- */
 function sjb_product_detail_content( array $data ) {
-	$img       = SJB_IMG;
-	$title     = esc_html( $data['title'] );
-	$image     = $data['image'];
-	$alt       = esc_attr( $data['alt'] );
-	$desc      = $data['description'];
-	$parent    = $data['parent_label'] ?? 'Products';
-	$parent_url = $data['parent_url']  ?? '/products/';
+	$img    = SJB_IMG . $data['image'];
+	$title  = $data['title'];
+	$alt    = $data['alt'];
+	$desc   = $data['description'];
+	$cuts   = sjb_cuts_list_block( $data['cuts'] );
+	$header = sjb_page_header_block( $title, '', [ 'Products' => '/products/', $title => null ] );
+	$cta    = sjb_cta_block(
+		'Fresh Cut Every Day',
+		'All our meats are processed in store daily. Call ahead for custom cuts or large orders.',
+		'Call 09 521 6319',
+		'tel:095216319'
+	);
 
-	$cuts_html = '';
-	foreach ( $data['cuts'] as $cut ) {
-		$cuts_html .= '<li>' . esc_html( $cut ) . '</li>';
-	}
+	return <<<BLOCKS
+{$header}
 
-	return <<<HTML
-<!-- wp:html -->
-<div class="page-header">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a><span>/</span>
-      <a href="{$parent_url}">{$parent}</a><span>/</span>
-      <span>{$title}</span>
-    </nav>
-    <h1>{$title}</h1>
-  </div>
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"6rem","bottom":"6rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull" style="padding-top:6rem;padding-right:0;padding-bottom:6rem;padding-left:0">
+
+<!-- wp:columns {"align":"wide","isStackedOnMobile":true,"className":"sjb-product-detail","style":{"spacing":{"blockGap":{"left":"4rem"}}}} -->
+<div class="wp-block-columns alignwide sjb-product-detail">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:image {"sizeSlug":"full","style":{"border":{"radius":"12px"}}} -->
+<figure class="wp-block-image size-full" style="border-radius:12px"><img src="{$img}" alt="{$alt}" loading="lazy"/></figure>
+<!-- /wp:image -->
 </div>
-<!-- /wp:html -->
+<!-- /wp:column -->
 
-<!-- wp:html -->
-<section class="section">
-  <div class="container">
-    <div class="product-detail">
-      <div class="product-detail__image">
-        <img src="{$img}{$image}" alt="{$alt}" width="600" height="450" loading="lazy">
-      </div>
-      <div class="product-detail__content">
-        <h2>About Our {$title}</h2>
-        <p>{$desc}</p>
-        <p>All cuts are available from our store at the corner of Felton Mathew Ave and Merton Rd, St Johns. Call ahead and we'll have your order ready for quick collection.</p>
-        <ul class="product-list">
-          {$cuts_html}
-        </ul>
-        <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap;">
-          <a href="tel:095216319" class="btn btn--primary">Call to Order</a>
-          <a href="/contact/" class="btn btn--secondary">Contact Us</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
+<!-- wp:column -->
+<div class="wp-block-column">
 
-<!-- wp:html -->
-<section class="cta-banner">
-  <div class="container">
-    <h2>Fresh Cut Every Day</h2>
-    <p>All our meats are processed in store daily. Call ahead for custom cuts or large orders.</p>
-    <a href="tel:095216319" class="btn btn--primary btn--lg">Call 09 521 6319</a>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML;
+<!-- wp:heading {"level":2,"style":{"spacing":{"margin":{"top":"0","bottom":"1.5rem"}}}} -->
+<h2 class="wp-block-heading" style="margin-top:0;margin-bottom:1.5rem">About Our {$title}</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"}}} -->
+<p class="has-text-color" style="color:#6b7b8a">{$desc}</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"spacing":{"margin":{"bottom":"0.5rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;margin-bottom:0.5rem">All cuts are available from our store at the corner of Felton Mathew Ave and Merton Rd, St Johns. Call ahead and we'll have your order ready.</p>
+<!-- /wp:paragraph -->
+
+{$cuts}
+
+<!-- wp:buttons {"style":{"spacing":{"blockGap":"1rem","margin":{"top":"2rem"}}}} -->
+<div class="wp-block-buttons" style="margin-top:2rem">
+<!-- wp:button {"style":{"color":{"background":"#2b6374","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"0.75rem","bottom":"0.75rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="tel:095216319" style="border-radius:9999px;color:#ffffff;background-color:#2b6374;padding:0.75rem 1.5rem">Call to Order</a></div>
+<!-- /wp:button -->
+<!-- wp:button {"className":"is-style-outline","style":{"color":{"text":"#2b6374"},"border":{"radius":"9999px","color":"#2b6374","width":"2px"},"spacing":{"padding":{"top":"0.75rem","bottom":"0.75rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link has-text-color wp-element-button" href="/contact/" style="border-radius:9999px;border-color:#2b6374;border-width:2px;color:#2b6374;padding:0.75rem 1.5rem">Contact Us</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+{$cta}
+BLOCKS;
 }
 
 /* ---- RECIPES ---- */
 function sjb_recipes_content() {
-	$img = SJB_IMG;
-	return <<<HTML
-<!-- wp:html -->
-<div class="page-header">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Recipes</span></nav>
-    <h1>Recipes</h1>
-    <p>Make the most of your free range meats with these simple, delicious recipes from our butchers.</p>
-  </div>
+	$img    = SJB_IMG;
+	$header = sjb_page_header_block(
+		'Recipes',
+		'Make the most of your free range meats with these simple, delicious recipes from our butchers.',
+		[ 'Recipes' => null ]
+	);
+
+	return <<<BLOCKS
+{$header}
+
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"6rem","bottom":"6rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull" style="padding-top:6rem;padding-right:0;padding-bottom:6rem;padding-left:0">
+
+<!-- wp:group {"align":"wide","className":"sjb-recipe-card","style":{"color":{"background":"#ffffff"},"border":{"radius":"12px"},"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignwide sjb-recipe-card has-background" style="background-color:#ffffff;border-radius:12px;padding:0">
+<!-- wp:columns {"isStackedOnMobile":true} -->
+<div class="wp-block-columns">
+<!-- wp:column {"width":"280px"} -->
+<div class="wp-block-column" style="flex-basis:280px">
+<!-- wp:image {"sizeSlug":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<figure class="wp-block-image size-full" style="margin:0"><img src="{$img}images-bbq-sausages-and-onions.jpg" alt="BBQ sausages" loading="lazy"/></figure>
+<!-- /wp:image -->
 </div>
-<!-- /wp:html -->
+<!-- /wp:column -->
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"2rem","bottom":"2rem","left":"2rem","right":"2rem"}}}} -->
+<div class="wp-block-group" style="padding:2rem">
+<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"1.4rem"},"spacing":{"margin":{"top":"0","bottom":"0.5rem"}}}} -->
+<h2 class="wp-block-heading" style="font-size:1.4rem;margin-top:0;margin-bottom:0.5rem">Classic NZ BBQ Sausages with Caramelised Onions</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"className":"sjb-recipe-meta","style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.8rem"},"spacing":{"margin":{"top":"0","bottom":"1rem"}}}} -->
+<p class="sjb-recipe-meta has-text-color" style="color:#6b7b8a;font-size:0.8rem;margin-top:0;margin-bottom:1rem">Prep: 10 min &nbsp;·&nbsp; Cook: 20 min &nbsp;·&nbsp; Serves: 4</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.9rem"},"spacing":{"margin":{"bottom":"1rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.9rem;margin-bottom:1rem">The quintessential Kiwi BBQ — our handmade pork &amp; fennel sausages paired with sweet caramelised onions.</p>
+<!-- /wp:paragraph -->
+<!-- wp:details {"className":"sjb-recipe-accordion"} -->
+<details class="wp-block-details sjb-recipe-accordion"><summary>Ingredients</summary>
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item --><li>8 Saint Johns Butchery pork &amp; fennel sausages</li><!-- /wp:list-item --><!-- wp:list-item --><li>2 large onions, thinly sliced</li><!-- /wp:list-item --><!-- wp:list-item --><li>2 tbsp butter, 1 tbsp brown sugar, 1 tbsp balsamic vinegar</li><!-- /wp:list-item --><!-- wp:list-item --><li>Salt and pepper to taste</li><!-- /wp:list-item --><!-- wp:list-item --><li>Burger buns and condiments to serve (optional)</li><!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+</details>
+<!-- /wp:details -->
+<!-- wp:details {"className":"sjb-recipe-accordion"} -->
+<details class="wp-block-details sjb-recipe-accordion"><summary>Method</summary>
+<!-- wp:list {"ordered":true,"className":"sjb-recipe-method"} -->
+<ol class="wp-block-list sjb-recipe-method"><!-- wp:list-item --><li>Preheat BBQ or grill to medium heat.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Melt butter in a pan over medium-low heat. Add onions and salt. Cook, stirring, for 15 minutes until golden.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Add brown sugar and balsamic vinegar. Cook a further 5 minutes until caramelised.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Cook sausages on the BBQ, turning regularly, for 12–15 minutes until cooked through.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Serve sausages topped with caramelised onions.</li><!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+</details>
+<!-- /wp:details -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+</div>
+<!-- /wp:group -->
 
-<!-- wp:html -->
-<section class="section">
-  <div class="container">
+<!-- wp:group {"align":"wide","className":"sjb-recipe-card","style":{"color":{"background":"#ffffff"},"border":{"radius":"12px"},"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignwide sjb-recipe-card has-background" style="background-color:#ffffff;border-radius:12px;padding:0">
+<!-- wp:columns {"isStackedOnMobile":true} -->
+<div class="wp-block-columns">
+<!-- wp:column {"width":"280px"} -->
+<div class="wp-block-column" style="flex-basis:280px">
+<!-- wp:image {"sizeSlug":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<figure class="wp-block-image size-full" style="margin:0"><img src="{$img}images-Saint-Johns-Butchery-Lamb.jpg" alt="Lamb shanks" loading="lazy"/></figure>
+<!-- /wp:image -->
+</div>
+<!-- /wp:column -->
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"2rem","bottom":"2rem","left":"2rem","right":"2rem"}}}} -->
+<div class="wp-block-group" style="padding:2rem">
+<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"1.4rem"},"spacing":{"margin":{"top":"0","bottom":"0.5rem"}}}} -->
+<h2 class="wp-block-heading" style="font-size:1.4rem;margin-top:0;margin-bottom:0.5rem">Slow-Braised Lamb Shanks with Red Wine &amp; Rosemary</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"className":"sjb-recipe-meta","style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.8rem"},"spacing":{"margin":{"top":"0","bottom":"1rem"}}}} -->
+<p class="sjb-recipe-meta has-text-color" style="color:#6b7b8a;font-size:0.8rem;margin-top:0;margin-bottom:1rem">Prep: 20 min &nbsp;·&nbsp; Cook: 2.5 hrs &nbsp;·&nbsp; Serves: 4</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.9rem"},"spacing":{"margin":{"bottom":"1rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.9rem;margin-bottom:1rem">A classic winter warmer. Free range lamb shanks braised low and slow in red wine until the meat falls off the bone.</p>
+<!-- /wp:paragraph -->
+<!-- wp:details {"className":"sjb-recipe-accordion"} -->
+<details class="wp-block-details sjb-recipe-accordion"><summary>Ingredients</summary>
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item --><li>4 free range lamb shanks</li><!-- /wp:list-item --><!-- wp:list-item --><li>2 onions (diced), 3 carrots (chopped), 4 garlic cloves (crushed)</li><!-- /wp:list-item --><!-- wp:list-item --><li>1 cup red wine, 2 x 400g tins crushed tomatoes, 1 cup beef stock</li><!-- /wp:list-item --><!-- wp:list-item --><li>2 sprigs rosemary, 3 sprigs thyme, olive oil, salt and pepper</li><!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+</details>
+<!-- /wp:details -->
+<!-- wp:details {"className":"sjb-recipe-accordion"} -->
+<details class="wp-block-details sjb-recipe-accordion"><summary>Method</summary>
+<!-- wp:list {"ordered":true,"className":"sjb-recipe-method"} -->
+<ol class="wp-block-list sjb-recipe-method"><!-- wp:list-item --><li>Preheat oven to 160°C. Season shanks and brown all sides in hot oil (8 min). Remove.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Sauté onions, carrots, garlic for 5 minutes. Pour in wine; simmer 2 minutes.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Add tomatoes, stock, herbs, and shanks. Cover and braise 2–2.5 hours until meat is falling off the bone.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Serve over creamy mashed potato.</li><!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+</details>
+<!-- /wp:details -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+</div>
+<!-- /wp:group -->
 
-    <!-- Recipe 1 -->
-    <article class="recipe-card">
-      <div class="recipe-card__image">
-        <img src="{$img}images-bbq-sausages-and-onions.jpg" alt="BBQ sausages and caramelised onions" loading="lazy">
-      </div>
-      <div class="recipe-card__body">
-        <h2 class="recipe-card__title">Classic NZ BBQ Sausages with Caramelised Onions</h2>
-        <div class="recipe-card__meta">
-          <span>Prep: 10 min</span><span>Cook: 20 min</span><span>Serves: 4</span>
-        </div>
-        <p class="recipe-card__desc">The quintessential Kiwi BBQ — our handmade pork &amp; fennel sausages paired with sweet caramelised onions.</p>
-        <details class="recipe-accordion">
-          <summary>Ingredients</summary>
-          <ul class="recipe-ingredients">
-            <li>8 Saint Johns Butchery pork &amp; fennel sausages</li>
-            <li>2 large onions, thinly sliced</li>
-            <li>2 tbsp butter</li>
-            <li>1 tbsp brown sugar</li>
-            <li>1 tbsp balsamic vinegar</li>
-            <li>Salt and pepper to taste</li>
-            <li>Burger buns and condiments to serve (optional)</li>
-          </ul>
-        </details>
-        <details class="recipe-accordion">
-          <summary>Method</summary>
-          <ol class="recipe-method">
-            <li>Preheat BBQ or grill to medium heat. Brush grates lightly with oil.</li>
-            <li>Melt butter in a frying pan over medium-low heat. Add onions and a pinch of salt. Cook slowly, stirring occasionally, for 15 minutes until soft and golden.</li>
-            <li>Add brown sugar and balsamic vinegar to onions. Stir and cook a further 5 minutes until caramelised. Keep warm.</li>
-            <li>Cook sausages on the BBQ, turning regularly, for 12–15 minutes until cooked through with no pink centre.</li>
-            <li>Serve sausages topped with caramelised onions.</li>
-          </ol>
-        </details>
-      </div>
-    </article>
+<!-- wp:group {"align":"wide","className":"sjb-recipe-card","style":{"color":{"background":"#ffffff"},"border":{"radius":"12px"},"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignwide sjb-recipe-card has-background" style="background-color:#ffffff;border-radius:12px;padding:0">
+<!-- wp:columns {"isStackedOnMobile":true} -->
+<div class="wp-block-columns">
+<!-- wp:column {"width":"280px"} -->
+<div class="wp-block-column" style="flex-basis:280px">
+<!-- wp:image {"sizeSlug":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<figure class="wp-block-image size-full" style="margin:0"><img src="{$img}images-Saint-Johns-Butchery-Beef1.jpg" alt="Eye fillet steak" loading="lazy"/></figure>
+<!-- /wp:image -->
+</div>
+<!-- /wp:column -->
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"2rem","bottom":"2rem","left":"2rem","right":"2rem"}}}} -->
+<div class="wp-block-group" style="padding:2rem">
+<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"1.4rem"},"spacing":{"margin":{"top":"0","bottom":"0.5rem"}}}} -->
+<h2 class="wp-block-heading" style="font-size:1.4rem;margin-top:0;margin-bottom:0.5rem">Pan-Seared Eye Fillet with Garlic Herb Butter</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"className":"sjb-recipe-meta","style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.8rem"},"spacing":{"margin":{"top":"0","bottom":"1rem"}}}} -->
+<p class="sjb-recipe-meta has-text-color" style="color:#6b7b8a;font-size:0.8rem;margin-top:0;margin-bottom:1rem">Prep: 10 min &nbsp;·&nbsp; Cook: 10 min &nbsp;·&nbsp; Serves: 2</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.9rem"},"spacing":{"margin":{"bottom":"1rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.9rem;margin-bottom:1rem">The king of steaks, simply cooked. Let the quality of the meat do the talking.</p>
+<!-- /wp:paragraph -->
+<!-- wp:details {"className":"sjb-recipe-accordion"} -->
+<details class="wp-block-details sjb-recipe-accordion"><summary>Ingredients</summary>
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item --><li>2 eye fillet steaks (200g each, ~4cm thick)</li><!-- /wp:list-item --><!-- wp:list-item --><li>1 tbsp neutral oil, 50g butter, 3 garlic cloves (crushed)</li><!-- /wp:list-item --><!-- wp:list-item --><li>Fresh thyme, rosemary, flaky salt and black pepper</li><!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+</details>
+<!-- /wp:details -->
+<!-- wp:details {"className":"sjb-recipe-accordion"} -->
+<details class="wp-block-details sjb-recipe-accordion"><summary>Method</summary>
+<!-- wp:list {"ordered":true,"className":"sjb-recipe-method"} -->
+<ol class="wp-block-list sjb-recipe-method"><!-- wp:list-item --><li>Remove steaks from fridge 30 min before cooking. Pat dry, season generously.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Heat a heavy pan until smoking. Add oil and sear steaks 2.5 min per side.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Add butter, garlic, and herbs. Baste steaks continuously for 1–2 minutes.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Rest for 5 minutes before serving.</li><!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+</details>
+<!-- /wp:details -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+</div>
+<!-- /wp:group -->
 
-    <!-- Recipe 2 -->
-    <article class="recipe-card">
-      <div class="recipe-card__image">
-        <img src="{$img}images-Saint-Johns-Butchery-Lamb.jpg" alt="Slow-braised lamb shanks" loading="lazy">
-      </div>
-      <div class="recipe-card__body">
-        <h2 class="recipe-card__title">Slow-Braised Lamb Shanks with Red Wine &amp; Rosemary</h2>
-        <div class="recipe-card__meta">
-          <span>Prep: 20 min</span><span>Cook: 2.5 hrs</span><span>Serves: 4</span>
-        </div>
-        <p class="recipe-card__desc">A classic winter warmer. Free range lamb shanks braised low and slow in red wine until the meat falls off the bone.</p>
-        <details class="recipe-accordion">
-          <summary>Ingredients</summary>
-          <ul class="recipe-ingredients">
-            <li>4 free range lamb shanks</li>
-            <li>2 tbsp olive oil</li>
-            <li>2 onions, diced</li>
-            <li>3 carrots, roughly chopped</li>
-            <li>4 garlic cloves, crushed</li>
-            <li>1 cup red wine</li>
-            <li>2 x 400g tins crushed tomatoes</li>
-            <li>1 cup beef stock</li>
-            <li>2 sprigs fresh rosemary</li>
-            <li>3 sprigs fresh thyme</li>
-            <li>Salt and freshly ground black pepper</li>
-          </ul>
-        </details>
-        <details class="recipe-accordion">
-          <summary>Method</summary>
-          <ol class="recipe-method">
-            <li>Preheat oven to 160°C (320°F). Season lamb shanks generously with salt and pepper.</li>
-            <li>Heat oil in a large oven-proof casserole dish over high heat. Brown shanks on all sides (about 8 minutes). Remove and set aside.</li>
-            <li>Reduce heat to medium. Add onions, carrots, and garlic. Cook for 5 minutes until softened.</li>
-            <li>Pour in red wine and let it bubble for 2 minutes, scraping up any bits from the bottom.</li>
-            <li>Add crushed tomatoes, stock, rosemary, and thyme. Return shanks to the pot — they should be mostly submerged.</li>
-            <li>Cover and braise in the oven for 2–2.5 hours until the meat is falling off the bone.</li>
-            <li>Serve over creamy mashed potato or polenta.</li>
-          </ol>
-        </details>
-      </div>
-    </article>
-
-    <!-- Recipe 3 -->
-    <article class="recipe-card">
-      <div class="recipe-card__image">
-        <img src="{$img}images-Saint-Johns-Butchery-Pork.jpg" alt="Crispy pork belly" loading="lazy">
-      </div>
-      <div class="recipe-card__body">
-        <h2 class="recipe-card__title">Crispy Pork Belly with Apple Sauce</h2>
-        <div class="recipe-card__meta">
-          <span>Prep: 15 min (+ overnight)</span><span>Cook: 2 hrs</span><span>Serves: 6</span>
-        </div>
-        <p class="recipe-card__desc">Perfectly crispy crackling every time. Ask our butchers to score the skin for you — we're happy to help.</p>
-        <details class="recipe-accordion">
-          <summary>Ingredients</summary>
-          <ul class="recipe-ingredients">
-            <li>1.5 kg free range pork belly, skin scored</li>
-            <li>2 tsp flaky sea salt</li>
-            <li>1 tsp fennel seeds, crushed</li>
-            <li>1 tsp black pepper</li>
-            <li>Olive oil</li>
-            <li><strong>Apple Sauce:</strong> 4 Granny Smith apples (peeled, cored, chopped), 2 tbsp water, 1 tbsp sugar, squeeze of lemon</li>
-          </ul>
-        </details>
-        <details class="recipe-accordion">
-          <summary>Method</summary>
-          <ol class="recipe-method">
-            <li>The night before: pat skin completely dry with paper towels. Rub salt, fennel, and pepper generously into the skin. Leave uncovered in the fridge overnight.</li>
-            <li>Remove from fridge 30 minutes before cooking. Preheat oven to 220°C (430°F).</li>
-            <li>Place pork skin-side up on a rack in a roasting tray. Rub skin with a little olive oil.</li>
-            <li>Roast at 220°C for 30 minutes until skin begins to crackle and blister.</li>
-            <li>Reduce oven to 170°C (340°F) and roast for a further 1.5 hours until the meat is tender.</li>
-            <li>Meanwhile, simmer apple sauce ingredients in a small saucepan for 15 minutes, then mash or blend to desired texture.</li>
-            <li>Rest pork for 10 minutes before slicing. Serve with apple sauce and roasted vegetables.</li>
-          </ol>
-        </details>
-      </div>
-    </article>
-
-    <!-- Recipe 4 -->
-    <article class="recipe-card">
-      <div class="recipe-card__image">
-        <img src="{$img}images-Saint-Johns-Butchery-Beef1.jpg" alt="Pan-seared eye fillet steak" loading="lazy">
-      </div>
-      <div class="recipe-card__body">
-        <h2 class="recipe-card__title">Pan-Seared Eye Fillet with Garlic Herb Butter</h2>
-        <div class="recipe-card__meta">
-          <span>Prep: 10 min</span><span>Cook: 10 min</span><span>Serves: 2</span>
-        </div>
-        <p class="recipe-card__desc">The king of steaks, simply cooked. Let the quality of the meat do the talking — ask us to cut your fillet to the right thickness.</p>
-        <details class="recipe-accordion">
-          <summary>Ingredients</summary>
-          <ul class="recipe-ingredients">
-            <li>2 eye fillet steaks (200–220g each, about 4cm thick)</li>
-            <li>1 tbsp neutral oil (e.g. rice bran)</li>
-            <li>50g butter</li>
-            <li>3 garlic cloves, crushed</li>
-            <li>3 sprigs fresh thyme</li>
-            <li>1 sprig fresh rosemary</li>
-            <li>Flaky sea salt and freshly cracked black pepper</li>
-          </ul>
-        </details>
-        <details class="recipe-accordion">
-          <summary>Method</summary>
-          <ol class="recipe-method">
-            <li>Remove steaks from fridge 30 minutes before cooking. Pat dry and season generously with salt and pepper on all sides.</li>
-            <li>Heat a heavy-based pan (cast iron is ideal) over very high heat until smoking hot. Add oil.</li>
-            <li>Add steaks and sear for 2.5 minutes per side (for medium-rare) without moving them. Sear the edges briefly using tongs.</li>
-            <li>Reduce heat to medium. Add butter, garlic, thyme, and rosemary. Once butter is foaming, tilt the pan and baste the steaks continuously for 1–2 minutes.</li>
-            <li>Remove steaks to a warm plate. Rest for 5 minutes before serving — this is crucial for juicy results.</li>
-            <li>Serve with the pan butter drizzled over and your choice of sides.</li>
-          </ol>
-        </details>
-      </div>
-    </article>
-
-  </div>
-</section>
-<!-- /wp:html -->
-HTML;
+</div>
+<!-- /wp:group -->
+BLOCKS;
 }
 
 /* ---- LOCATION ---- */
 function sjb_location_content() {
-	return <<<HTML
-<!-- wp:html -->
-<div class="page-header">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Location</span></nav>
-    <h1>Find Us</h1>
-    <p>We're in St Johns, East Auckland — easy to find with plenty of off-street parking.</p>
-  </div>
+	$header = sjb_page_header_block(
+		'Find Us',
+		"We're in St Johns, East Auckland — easy to find with plenty of off-street parking.",
+		[ 'Location' => null ]
+	);
+
+	return <<<BLOCKS
+{$header}
+
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"6rem","bottom":"6rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull" style="padding-top:6rem;padding-right:0;padding-bottom:6rem;padding-left:0">
+
+<!-- wp:columns {"align":"wide","isStackedOnMobile":true,"style":{"spacing":{"blockGap":{"left":"2rem"}}}} -->
+<div class="wp-block-columns alignwide">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"sjb-card","style":{"color":{"background":"#ffffff"},"border":{"radius":"12px"},"spacing":{"padding":{"top":"2rem","bottom":"2rem","left":"2rem","right":"2rem"}}}} -->
+<div class="wp-block-group sjb-card has-background" style="background-color:#ffffff;border-radius:12px;padding:2rem">
+
+<!-- wp:heading {"level":3,"style":{"spacing":{"margin":{"top":"0","bottom":"1.5rem"}}}} -->
+<h3 class="wp-block-heading" style="margin-top:0;margin-bottom:1.5rem">Opening Hours</h3>
+<!-- /wp:heading -->
+
+<!-- wp:table {"className":"sjb-hours-table","style":{"spacing":{"margin":{"top":"0"}}}} -->
+<figure class="wp-block-table sjb-hours-table" style="margin-top:0"><table><tbody>
+<tr class="sjb-closed"><td><strong>Monday</strong></td><td>Closed</td></tr>
+<tr><td><strong>Tuesday</strong></td><td>7:30am – 6:00pm</td></tr>
+<tr><td><strong>Wednesday</strong></td><td>7:30am – 6:00pm</td></tr>
+<tr><td><strong>Thursday</strong></td><td>7:30am – 6:00pm</td></tr>
+<tr><td><strong>Friday</strong></td><td>7:30am – 6:00pm</td></tr>
+<tr><td><strong>Saturday</strong></td><td>8:00am – 6:00pm</td></tr>
+<tr><td><strong>Sunday</strong></td><td>8:30am – 5:00pm</td></tr>
+</tbody></table></figure>
+<!-- /wp:table -->
+
 </div>
-<!-- /wp:html -->
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
 
-<!-- wp:html -->
-<section class="section">
-  <div class="container">
-    <div class="contact-grid">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"sjb-card","style":{"color":{"background":"#ffffff"},"border":{"radius":"12px"},"spacing":{"padding":{"top":"2rem","bottom":"2rem","left":"2rem","right":"2rem"}}}} -->
+<div class="wp-block-group sjb-card has-background" style="background-color:#ffffff;border-radius:12px;padding:2rem">
 
-      <div class="card">
-        <h3>Opening Hours</h3>
-        <table class="hours-table">
-          <tbody>
-            <tr class="closed"><td>Monday</td><td>Closed</td></tr>
-            <tr><td>Tuesday</td><td>7:30am – 6:00pm</td></tr>
-            <tr><td>Wednesday</td><td>7:30am – 6:00pm</td></tr>
-            <tr><td>Thursday</td><td>7:30am – 6:00pm</td></tr>
-            <tr><td>Friday</td><td>7:30am – 6:00pm</td></tr>
-            <tr><td>Saturday</td><td>8:00am – 6:00pm</td></tr>
-            <tr><td>Sunday</td><td>8:30am – 5:00pm</td></tr>
-          </tbody>
-        </table>
-      </div>
+<!-- wp:heading {"level":3,"style":{"spacing":{"margin":{"top":"0","bottom":"1.5rem"}}}} -->
+<h3 class="wp-block-heading" style="margin-top:0;margin-bottom:1.5rem">Contact &amp; Address</h3>
+<!-- /wp:heading -->
 
-      <div class="card">
-        <h3>Contact &amp; Address</h3>
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.85rem"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.85rem;margin-top:0;margin-bottom:0.25rem">Address</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.875rem"},"spacing":{"margin":{"bottom":"1.5rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.875rem;margin-bottom:1.5rem">Corner of Felton Mathew Ave &amp; Merton Rd<br>St Johns, Auckland, New Zealand</p>
+<!-- /wp:paragraph -->
 
-        <div class="contact-item">
-          <div class="contact-item__icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-          </div>
-          <div class="contact-item__text">
-            <strong>Address</strong>
-            <span>Corner of Felton Mathew Ave &amp; Merton Rd<br>St Johns, Auckland, New Zealand</span>
-          </div>
-        </div>
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.85rem"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.85rem;margin-top:0;margin-bottom:0.25rem">Phone</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.875rem"},"spacing":{"margin":{"bottom":"1.5rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.875rem;margin-bottom:1.5rem"><a href="tel:095216319" style="color:#2b6374">09 521 6319</a></p>
+<!-- /wp:paragraph -->
 
-        <div class="contact-item">
-          <div class="contact-item__icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
-          </div>
-          <div class="contact-item__text">
-            <strong>Phone</strong>
-            <a href="tel:095216319">09 521 6319</a>
-          </div>
-        </div>
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.85rem"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.85rem;margin-top:0;margin-bottom:0.25rem">Email</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.875rem"},"spacing":{"margin":{"bottom":"1.5rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.875rem;margin-bottom:1.5rem"><a href="mailto:dave@saintjohnsbutchery.co.nz" style="color:#2b6374">dave@saintjohnsbutchery.co.nz</a></p>
+<!-- /wp:paragraph -->
 
-        <div class="contact-item">
-          <div class="contact-item__icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-          </div>
-          <div class="contact-item__text">
-            <strong>Email</strong>
-            <a href="mailto:dave@saintjohnsbutchery.co.nz">dave@saintjohnsbutchery.co.nz</a>
-          </div>
-        </div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons">
+<!-- wp:button {"style":{"color":{"background":"#2b6374","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"0.75rem","bottom":"0.75rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="https://maps.google.com/?q=Saint+Johns+Butchery+St+Johns+Auckland" target="_blank" rel="noopener noreferrer" style="border-radius:9999px;color:#ffffff;background-color:#2b6374;padding:0.75rem 1.5rem">View on Google Maps</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
 
-        <div class="contact-item">
-          <div class="contact-item__icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
-          </div>
-          <div class="contact-item__text">
-            <strong>Parking</strong>
-            <span>Free off-street parking available on site</span>
-          </div>
-        </div>
-      </div>
-    </div>
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
 
-    <div class="map-container" style="margin-top:3rem;">
-      <iframe
-        title="Saint Johns Butchery on Google Maps"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3190.174804878299!2d174.8484323!3d-36.879947!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d0d4b1b3b3b3b3b%3A0x0!2sSaint+Johns+Butchery!5e0!3m2!1sen!2snz!4v1234567890"
-        allowfullscreen
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML;
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+BLOCKS;
 }
 
 /* ---- CONTACT ---- */
 function sjb_contact_content() {
-	return <<<HTML
-<!-- wp:html -->
-<div class="page-header">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Contact</span></nav>
-    <h1>Get in Touch</h1>
-    <p>Have a question or want to place a custom order? We'd love to hear from you.</p>
-  </div>
+	$header = sjb_page_header_block(
+		'Get in Touch',
+		'Have a question or want to place a custom order? We\'d love to hear from you.',
+		[ 'Contact' => null ]
+	);
+	$cta = sjb_cta_block(
+		'Prefer to Talk?',
+		"Give us a call during business hours and we'll help straight away.",
+		'Call 09 521 6319',
+		'tel:095216319'
+	);
+
+	return <<<BLOCKS
+{$header}
+
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"6rem","bottom":"6rem","left":"0","right":"0"}}}} -->
+<div class="wp-block-group alignfull" style="padding-top:6rem;padding-right:0;padding-bottom:6rem;padding-left:0">
+
+<!-- wp:columns {"align":"wide","isStackedOnMobile":true,"style":{"spacing":{"blockGap":{"left":"2rem"}}}} -->
+<div class="wp-block-columns alignwide">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"sjb-card","style":{"color":{"background":"#ffffff"},"border":{"radius":"12px"},"spacing":{"padding":{"top":"2rem","bottom":"2rem","left":"2rem","right":"2rem"}}}} -->
+<div class="wp-block-group sjb-card has-background" style="background-color:#ffffff;border-radius:12px;padding:2rem">
+
+<!-- wp:heading {"level":3,"style":{"spacing":{"margin":{"top":"0","bottom":"0.5rem"}}}} -->
+<h3 class="wp-block-heading" style="margin-top:0;margin-bottom:0.5rem">Contact Info</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.9rem"},"spacing":{"margin":{"bottom":"1.5rem"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.9rem;margin-bottom:1.5rem">For orders and enquiries, call us during business hours or send us an email.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.85rem"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.85rem;margin-top:0;margin-bottom:0.25rem">Phone</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"bottom":"1.25rem"}}}} -->
+<p style="margin-bottom:1.25rem"><a href="tel:095216319" style="color:#2b6374;font-weight:600;font-size:1.1rem">09 521 6319</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.85rem"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.85rem;margin-top:0;margin-bottom:0.25rem">Email</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"bottom":"1.25rem"}}}} -->
+<p style="margin-bottom:1.25rem"><a href="mailto:dave@saintjohnsbutchery.co.nz" style="color:#2b6374">dave@saintjohnsbutchery.co.nz</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":4,"style":{"typography":{"fontSize":"0.85rem"},"spacing":{"margin":{"top":"0","bottom":"0.25rem"}}}} -->
+<h4 class="wp-block-heading" style="font-size:0.85rem;margin-top:0;margin-bottom:0.25rem">Address</h4>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"spacing":{"margin":{"bottom":"0"}}}} -->
+<p class="has-text-color" style="color:#6b7b8a;margin-bottom:0">Corner of Felton Mathew Ave &amp; Merton Rd<br>St Johns, Auckland</p>
+<!-- /wp:paragraph -->
+
 </div>
-<!-- /wp:html -->
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
 
-<!-- wp:html -->
-<section class="section">
-  <div class="container">
-    <div class="contact-grid">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"sjb-card","style":{"color":{"background":"#ffffff"},"border":{"radius":"12px"},"spacing":{"padding":{"top":"2rem","bottom":"2rem","left":"2rem","right":"2rem"}}}} -->
+<div class="wp-block-group sjb-card has-background" style="background-color:#ffffff;border-radius:12px;padding:2rem">
 
-      <div class="card">
-        <h3>Send Us a Message</h3>
-        <p style="color:var(--gray-500);margin-bottom:1.5rem;font-size:0.9rem;">For orders and enquiries, fill out the form below or give us a call during business hours.</p>
+<!-- wp:heading {"level":3,"style":{"spacing":{"margin":{"top":"0","bottom":"1.5rem"}}}} -->
+<h3 class="wp-block-heading" style="margin-top:0;margin-bottom:1.5rem">Opening Hours</h3>
+<!-- /wp:heading -->
 
-        <form action="" method="post" style="display:flex;flex-direction:column;gap:1rem;">
-          <div>
-            <label for="contact-name" style="display:block;font-size:0.85rem;font-weight:600;color:var(--gray-900);margin-bottom:0.4rem;">Name *</label>
-            <input type="text" id="contact-name" name="name" required
-              style="width:100%;padding:0.75rem 1rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.9rem;">
-          </div>
-          <div>
-            <label for="contact-email" style="display:block;font-size:0.85rem;font-weight:600;color:var(--gray-900);margin-bottom:0.4rem;">Email *</label>
-            <input type="email" id="contact-email" name="email" required
-              style="width:100%;padding:0.75rem 1rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.9rem;">
-          </div>
-          <div>
-            <label for="contact-phone" style="display:block;font-size:0.85rem;font-weight:600;color:var(--gray-900);margin-bottom:0.4rem;">Phone</label>
-            <input type="tel" id="contact-phone" name="phone"
-              style="width:100%;padding:0.75rem 1rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.9rem;">
-          </div>
-          <div>
-            <label for="contact-message" style="display:block;font-size:0.85rem;font-weight:600;color:var(--gray-900);margin-bottom:0.4rem;">Message *</label>
-            <textarea id="contact-message" name="message" rows="5" required
-              style="width:100%;padding:0.75rem 1rem;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.9rem;resize:vertical;"></textarea>
-          </div>
-          <button type="submit" class="btn btn--primary">Send Message</button>
-        </form>
-      </div>
+<!-- wp:table {"className":"sjb-hours-table"} -->
+<figure class="wp-block-table sjb-hours-table"><table><tbody>
+<tr class="sjb-closed"><td><strong>Monday</strong></td><td>Closed</td></tr>
+<tr><td><strong>Tue – Fri</strong></td><td>7:30am – 6:00pm</td></tr>
+<tr><td><strong>Saturday</strong></td><td>8:00am – 6:00pm</td></tr>
+<tr><td><strong>Sunday</strong></td><td>8:30am – 5:00pm</td></tr>
+</tbody></table></figure>
+<!-- /wp:table -->
 
-      <div>
-        <div class="card" style="margin-bottom:1.5rem;">
-          <h3>Contact Info</h3>
-          <div class="contact-item">
-            <div class="contact-item__icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
-            </div>
-            <div class="contact-item__text">
-              <strong>Phone</strong>
-              <a href="tel:095216319">09 521 6319</a>
-            </div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-item__icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-            </div>
-            <div class="contact-item__text">
-              <strong>Email</strong>
-              <a href="mailto:dave@saintjohnsbutchery.co.nz">dave@saintjohnsbutchery.co.nz</a>
-            </div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-item__icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-            </div>
-            <div class="contact-item__text">
-              <strong>Address</strong>
-              <span>Corner of Felton Mathew Ave &amp; Merton Rd, St Johns, Auckland</span>
-            </div>
-          </div>
-        </div>
+<!-- wp:separator {"style":{"spacing":{"margin":{"top":"1.5rem","bottom":"1.5rem"}}},"className":"is-style-wide"} -->
+<hr class="wp-block-separator is-style-wide" style="margin-top:1.5rem;margin-bottom:1.5rem"/>
+<!-- /wp:separator -->
 
-        <div class="card">
-          <h3>Opening Hours</h3>
-          <table class="hours-table">
-            <tbody>
-              <tr class="closed"><td>Monday</td><td>Closed</td></tr>
-              <tr><td>Tue – Fri</td><td>7:30am – 6:00pm</td></tr>
-              <tr><td>Saturday</td><td>8:00am – 6:00pm</td></tr>
-              <tr><td>Sunday</td><td>8:30am – 5:00pm</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<!-- wp:paragraph {"style":{"color":{"text":"#6b7b8a"},"typography":{"fontSize":"0.875rem"}}} -->
+<p class="has-text-color" style="color:#6b7b8a;font-size:0.875rem">To place an order or enquire about custom cuts, the easiest way is to call us during business hours. We're always happy to help.</p>
+<!-- /wp:paragraph -->
 
-    </div>
-  </div>
-</section>
-<!-- /wp:html -->
-HTML;
+<!-- wp:buttons {"style":{"spacing":{"margin":{"top":"1.5rem"}}}} -->
+<div class="wp-block-buttons" style="margin-top:1.5rem">
+<!-- wp:button {"style":{"color":{"background":"#2b6374","text":"#ffffff"},"border":{"radius":"9999px"},"spacing":{"padding":{"top":"0.75rem","bottom":"0.75rem","left":"1.5rem","right":"1.5rem"}}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="tel:095216319" style="border-radius:9999px;color:#ffffff;background-color:#2b6374;padding:0.75rem 1.5rem">Call 09 521 6319</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+{$cta}
+BLOCKS;
 }
 
 /* ============================================================
-   Page data definitions
+   Product page data
    ============================================================ */
-
 function sjb_get_product_pages() {
 	return [
 		'lamb' => [
 			'title'       => 'Lamb',
 			'image'       => 'images-Saint-Johns-Butchery-Lamb.jpg',
 			'alt'         => 'Fresh free range lamb cuts at Saint Johns Butchery',
-			'description' => 'Our lamb is sourced from New Zealand\'s finest free range farms — animals that graze on lush green pasture. Every cut is prepared fresh in store by our experienced butchers, ensuring outstanding quality and flavour. Whether you\'re after a show-stopping rack for a dinner party or everyday mince for a family meal, we have you covered.',
-			'cuts'        => [
-				'Lamb Rack', 'Lamb Cutlets', 'Lamb Chops', 'Lamb Loin Chops',
-				'Lamb Shoulder (bone-in)', 'Lamb Shoulder (boneless)', 'Lamb Leg (bone-in)',
-				'Lamb Leg (boneless)', 'Lamb Shanks', 'Lamb Mince', 'Lamb Stir Fry',
-				'Lamb Sausages', 'Lamb Ribs', 'Lamb Kidney', 'Lamb Liver',
-			],
+			'description' => 'Our lamb is sourced from New Zealand\'s finest free range farms — animals that graze on lush green pasture. Every cut is prepared fresh in store by our experienced butchers, ensuring outstanding quality and flavour.',
+			'cuts'        => [ 'Lamb Rack', 'Lamb Cutlets', 'Lamb Chops', 'Lamb Loin Chops', 'Lamb Shoulder (bone-in)', 'Lamb Shoulder (boneless)', 'Lamb Leg (bone-in)', 'Lamb Leg (boneless)', 'Lamb Shanks', 'Lamb Mince', 'Lamb Stir Fry', 'Lamb Sausages', 'Lamb Ribs' ],
 		],
 		'beef' => [
 			'title'       => 'Beef',
 			'image'       => 'images-Saint-Johns-Butchery-Beef1.jpg',
 			'alt'         => 'Quality pasture-fed beef at Saint Johns Butchery',
-			'description' => 'All our beef is sourced from grass-fed, pasture-raised New Zealand cattle. Pasture-fed beef is naturally richer in flavour and higher in beneficial omega-3 fatty acids. Our butchers hand-select each animal and prepare every cut fresh in store — from tender eye fillet to flavoursome slow-cook cuts.',
-			'cuts'        => [
-				'Eye Fillet (Tenderloin)', 'Scotch Fillet / Ribeye', 'Sirloin Steak',
-				'Rump Steak', 'T-Bone Steak', 'Flat Iron Steak', 'Flank Steak',
-				'Beef Mince', 'Beef Stir Fry', 'Chuck Steak', 'Blade Steak',
-				'Oxtail', 'Short Ribs', 'Brisket', 'Topside Roast',
-				'Silverside', 'Osso Bucco', 'Corned Beef',
-			],
+			'description' => 'All our beef is sourced from grass-fed, pasture-raised New Zealand cattle. Pasture-fed beef is naturally richer in flavour and higher in beneficial omega-3 fatty acids. Our butchers hand-select each animal and prepare every cut fresh in store.',
+			'cuts'        => [ 'Eye Fillet (Tenderloin)', 'Scotch Fillet / Ribeye', 'Sirloin Steak', 'Rump Steak', 'T-Bone Steak', 'Flat Iron Steak', 'Beef Mince', 'Beef Stir Fry', 'Chuck Steak', 'Blade Steak', 'Oxtail', 'Short Ribs', 'Brisket', 'Topside Roast', 'Silverside', 'Osso Bucco', 'Corned Beef' ],
 		],
 		'pork' => [
 			'title'       => 'Pork',
 			'image'       => 'images-Saint-Johns-Butchery-Pork.jpg',
 			'alt'         => 'Free range pork at Saint Johns Butchery',
-			'description' => 'Our pork comes from free range farms where pigs are raised outdoors on a natural diet, giving the meat exceptional flavour and texture. Ask our butchers about seasonal specials including whole roasting pigs for events, and we can also score pork skin to guarantee perfect crackling every time.',
-			'cuts'        => [
-				'Pork Loin Chops', 'Pork Shoulder Chops', 'Pork Belly (whole & sliced)',
-				'Pork Shoulder Roast', 'Pork Leg Roast', 'Pork Scotch Fillet',
-				'Pork Mince', 'Pork Stir Fry', 'Pork Ribs', 'Pork Spare Ribs',
-				'Pork Knuckle', 'Pork Neck Steaks',
-			],
+			'description' => 'Our pork comes from free range farms where pigs are raised outdoors on a natural diet. Ask our butchers about seasonal specials, and we can score pork skin to guarantee perfect crackling every time.',
+			'cuts'        => [ 'Pork Loin Chops', 'Pork Shoulder Chops', 'Pork Belly (whole & sliced)', 'Pork Shoulder Roast', 'Pork Leg Roast', 'Pork Scotch Fillet', 'Pork Mince', 'Pork Stir Fry', 'Pork Ribs', 'Pork Spare Ribs', 'Pork Knuckle', 'Pork Neck Steaks' ],
 		],
 		'chicken' => [
 			'title'       => 'Chicken',
 			'image'       => 'images-Saint-Johns-Butchery-Flavoured-Chicken.jpg',
 			'alt'         => 'Free range chicken at Saint Johns Butchery',
-			'description' => 'Our chicken is sourced from free range farms where birds have access to outdoor areas and are raised without unnecessary antibiotics. We stock a full range from whole birds to individual portions, plus our popular range of marinated and flavoured chicken — perfect for a quick midweek dinner.',
-			'cuts'        => [
-				'Whole Chicken', 'Chicken Breasts (single & double)', 'Chicken Thighs (bone-in)',
-				'Chicken Thighs (boneless)', 'Chicken Drumsticks', 'Chicken Wings',
-				'Chicken Nibbles', 'Chicken Mince', 'Chicken Stir Fry',
-				'Marinated Lemon & Herb Thighs', 'Marinated Satay Thighs',
-				'Marinated BBQ Thighs', 'Spatchcock Chicken',
-			],
+			'description' => 'Our chicken is sourced from free range farms where birds have access to outdoor areas. We stock a full range from whole birds to individual portions, plus our popular range of marinated and flavoured chicken.',
+			'cuts'        => [ 'Whole Chicken', 'Chicken Breasts', 'Chicken Thighs (bone-in)', 'Chicken Thighs (boneless)', 'Chicken Drumsticks', 'Chicken Wings', 'Chicken Nibbles', 'Chicken Mince', 'Marinated Lemon & Herb Thighs', 'Marinated Satay Thighs', 'Marinated BBQ Thighs', 'Spatchcock Chicken' ],
 		],
 		'sausages' => [
 			'title'       => 'Sausages',
 			'image'       => 'images-Hanging-Sausages.jpg',
 			'alt'         => 'Handmade sausages at Saint Johns Butchery',
-			'description' => 'Our sausages are made fresh in store every day using our own recipes and quality free range meats. We use natural casings and real ingredients — no fillers or artificial preservatives. With a huge range of flavours, there\'s something for every taste. Gluten-free options are also available; just ask.',
-			'cuts'        => [
-				'Pork & Fennel', 'Pork & Leek', 'Traditional Pork',
-				'Beef & Caramelised Onion', 'Beef & Pepper',
-				'Lamb & Rosemary', 'Lamb & Mint',
-				'Chicken & Herb', 'Chicken & Sundried Tomato',
-				'Chorizo-style', 'Italian-style', 'Venison',
-				'Gluten-Free options (ask in store)',
-			],
+			'description' => 'Our sausages are made fresh in store every day using our own recipes and quality free range meats. We use natural casings and real ingredients — no fillers or artificial preservatives. Gluten-free options are available; just ask.',
+			'cuts'        => [ 'Pork & Fennel', 'Pork & Leek', 'Traditional Pork', 'Beef & Caramelised Onion', 'Beef & Pepper', 'Lamb & Rosemary', 'Lamb & Mint', 'Chicken & Herb', 'Chicken & Sundried Tomato', 'Chorizo-style', 'Italian-style', 'Venison', 'Gluten-Free (ask in store)' ],
 		],
 		'specialty-meats' => [
 			'title'       => 'Specialty Meats',
 			'image'       => 'images-Saint-Johns-Butchery-Specialty-Meats-Hams.jpg',
 			'alt'         => 'Specialty and game meats at Saint Johns Butchery',
-			'description' => 'Explore our range of specialty and game meats sourced from quality New Zealand producers. From delicate venison to rich duck, these meats offer a unique flavour experience beyond everyday cuts. We can also source less common meats on request — just give us a call.',
-			'cuts'        => [
-				'Venison (farmed & wild)', 'Rabbit', 'Duck (whole & portions)',
-				'Quail', 'Hare', 'Turkey (seasonal)',
-				'Ox Tongue', 'Lamb Kidney', 'Beef Kidney',
-				'Chicken Liver', 'Lamb Liver', 'Beef Liver',
-				'Beef Heart', 'Tripe',
-			],
+			'description' => 'Explore our range of specialty and game meats sourced from quality New Zealand producers. From delicate venison to rich duck, these meats offer a unique flavour experience. We can also source less common meats on request.',
+			'cuts'        => [ 'Venison (farmed & wild)', 'Rabbit', 'Duck (whole & portions)', 'Quail', 'Hare', 'Turkey (seasonal)', 'Ox Tongue', 'Lamb Kidney', 'Beef Kidney', 'Chicken Liver', 'Lamb Liver', 'Beef Liver', 'Beef Heart' ],
 		],
 		'small-goods' => [
 			'title'       => 'Small Goods',
 			'image'       => 'images-Saint-Johns-Butchery-Small-Goods-Hams.jpg',
 			'alt'         => 'Small goods, bacon and ham at Saint Johns Butchery',
-			'description' => 'Our small goods are sourced from quality New Zealand producers who share our values around animal welfare and food quality. From thick-cut bacon to premium whole leg hams, our deli range is ideal for breakfast, entertaining, and everything in between.',
-			'cuts'        => [
-				'Streaky Bacon', 'Middle Bacon', 'Back Bacon', 'Thick-Cut Bacon',
-				'Whole Leg Ham', 'Half Leg Ham', 'Boneless Leg Ham',
-				'Salami', 'Prosciutto', 'Chorizo (cured)',
-				'Kabana', 'Smoked Chicken', 'Pastrami',
-				'Cooked Corned Beef',
-			],
+			'description' => 'Our small goods are sourced from quality New Zealand producers who share our values around animal welfare and food quality. From thick-cut bacon to premium whole leg hams, our deli range is ideal for breakfast and entertaining.',
+			'cuts'        => [ 'Streaky Bacon', 'Middle Bacon', 'Back Bacon', 'Thick-Cut Bacon', 'Whole Leg Ham', 'Half Leg Ham', 'Boneless Leg Ham', 'Salami', 'Prosciutto', 'Chorizo (cured)', 'Kabana', 'Smoked Chicken', 'Pastrami', 'Cooked Corned Beef' ],
 		],
 		'condiments' => [
 			'title'       => 'Condiments',
 			'image'       => 'images-Four-Saucemen-Sauces-St-Johns.jpg',
 			'alt'         => 'Sauces and condiments at Saint Johns Butchery',
-			'description' => 'Complement your meat with our curated range of sauces, marinades, and condiments. We stock the popular Four Saucemen range made right here in New Zealand, along with a selection of mustards, relishes, and rubs that pair perfectly with everything from a Sunday roast to a weeknight BBQ.',
-			'cuts'        => [
-				'Four Saucemen BBQ Sauce', 'Four Saucemen Hot Sauce', 'Four Saucemen Chipotle',
-				'Dijon Mustard', 'Wholegrain Mustard', 'Honey Mustard',
-				'Apple & Mint Jelly', 'Redcurrant Jelly',
-				'Herb & Garlic Rub', 'Smoky BBQ Rub', 'Cajun Spice Mix',
-				'Teriyaki Marinade', 'Lemon & Herb Marinade', 'Garlic & Herb Marinade',
-			],
+			'description' => 'Complement your meat with our curated range of sauces, marinades, and condiments. We stock the popular Four Saucemen range made in New Zealand, along with mustards, relishes, and rubs that pair perfectly with everything from a Sunday roast to a weeknight BBQ.',
+			'cuts'        => [ 'Four Saucemen BBQ Sauce', 'Four Saucemen Hot Sauce', 'Four Saucemen Chipotle', 'Dijon Mustard', 'Wholegrain Mustard', 'Honey Mustard', 'Apple & Mint Jelly', 'Redcurrant Jelly', 'Herb & Garlic Rub', 'Smoky BBQ Rub', 'Cajun Spice Mix', 'Teriyaki Marinade', 'Lemon & Herb Marinade' ],
 		],
 	];
 }
 
 /* ============================================================
-   Main page creator — runs on plugin activation
+   Main page creator
    ============================================================ */
-
 function sjb_create_pages() {
-
-	/* 1. Home */
-	$home_id = sjb_upsert_page( [
-		'post_title'   => 'Home',
-		'post_name'    => 'home',
-		'post_content' => sjb_home_content(),
-		'post_parent'  => 0,
-	] );
+	$home_id = sjb_upsert_page( 'Home', 'home', sjb_home_content(), 0 );
 	if ( $home_id ) {
 		update_option( 'show_on_front', 'page' );
 		update_option( 'page_on_front', $home_id );
 	}
 
-	/* 2. Products overview */
-	$products_id = sjb_upsert_page( [
-		'post_title'   => 'Products',
-		'post_name'    => 'products',
-		'post_content' => sjb_products_content(),
-		'post_parent'  => 0,
-	] );
+	$products_id = sjb_upsert_page( 'Products', 'products', sjb_products_content(), 0 );
 
-	/* 3. Individual product pages */
 	foreach ( sjb_get_product_pages() as $slug => $data ) {
-		$data['parent_label'] = 'Products';
-		$data['parent_url']   = '/products/';
-		sjb_upsert_page( [
-			'post_title'   => $data['title'],
-			'post_name'    => $slug,
-			'post_content' => sjb_product_detail_content( $data ),
-			'post_parent'  => $products_id ?: 0,
-		] );
+		sjb_upsert_page( $data['title'], $slug, sjb_product_detail_content( $data ), $products_id ?: 0 );
 	}
 
-	/* 4. Recipes */
-	sjb_upsert_page( [
-		'post_title'   => 'Recipes',
-		'post_name'    => 'recipes',
-		'post_content' => sjb_recipes_content(),
-		'post_parent'  => 0,
-	] );
-
-	/* 5. Location */
-	sjb_upsert_page( [
-		'post_title'   => 'Location',
-		'post_name'    => 'location',
-		'post_content' => sjb_location_content(),
-		'post_parent'  => 0,
-	] );
-
-	/* 6. Contact */
-	sjb_upsert_page( [
-		'post_title'   => 'Contact',
-		'post_name'    => 'contact',
-		'post_content' => sjb_contact_content(),
-		'post_parent'  => 0,
-	] );
+	sjb_upsert_page( 'Recipes',  'recipes',  sjb_recipes_content(),  0 );
+	sjb_upsert_page( 'Location', 'location', sjb_location_content(), 0 );
+	sjb_upsert_page( 'Contact',  'contact',  sjb_contact_content(),  0 );
 }
 
-/**
- * Insert a page if it doesn't already exist (matched by slug + parent).
- * Returns the page ID.
- */
-function sjb_upsert_page( array $args ) {
-	$existing = get_page_by_path( $args['post_name'] );
-	if ( $existing ) {
-		return (int) $existing->ID;
-	}
-
+function sjb_upsert_page( $title, $slug, $content, $parent ) {
+	$existing = get_page_by_path( $slug );
+	if ( $existing ) return (int) $existing->ID;
 	return wp_insert_post( [
-		'post_title'   => $args['post_title'],
-		'post_name'    => $args['post_name'],
-		'post_content' => $args['post_content'],
-		'post_parent'  => $args['post_parent'] ?? 0,
+		'post_title'   => $title,
+		'post_name'    => $slug,
+		'post_content' => $content,
+		'post_parent'  => $parent,
 		'post_status'  => 'publish',
 		'post_type'    => 'page',
 	] );
