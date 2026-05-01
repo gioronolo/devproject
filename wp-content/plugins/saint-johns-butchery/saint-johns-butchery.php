@@ -66,3 +66,4 @@ add_action( 'wp_body_open', 'sjb_announcement_bar' );
 function sjb_announcement_bar() {
 	echo '<div class="sjb-announcement">Open 6 days — Tue–Fri 7:30am–6pm &nbsp;|&nbsp; Sat 8am–6pm &nbsp;|&nbsp; Sun 8:30am–5pm</div>';
 }
+
